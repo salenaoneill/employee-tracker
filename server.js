@@ -1,7 +1,7 @@
 //dependencies
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
-//const { listenerCount } = require('mysql2/typings/mysql/lib/Connection');
+const cTable = require('console.table');
 
 //connection to sql database
 const connection = mysql.createConnection({
@@ -12,8 +12,9 @@ const connection = mysql.createConnection({
 });
 
 //connect & call prompt function
-connection.connect(err => {
+connection.connect((err) => {
     if (err) throw err;
+    
     console.log('connected as id' + connection.threadId);
     userPrompt();
 });
@@ -65,5 +66,40 @@ function userPrompt(){
         if (choices === 'update an employee role') {
             updateEmployee();
         }
+    });
+}
+
+viewDepartments = () => {
+    const sql = `SELECT department.id AS id, department.name AS department FROM department`;
+    connection.query(sql, (err, rows) => {
+        if (err) throw err;
+        console.table(rows);
+        userPrompt();
+    })
+} 
+
+viewRoles = () => {
+    const sql = `SELECT role.id, role.title, department.name AS department, role.salary
+                FROM role
+                INNER JOIN department ON role.department_id = department.id`;
+    connection.query(sql, (err, rows) => {
+        if (err) throw err;
+        console.table(rows);
+        userPrompt();
+    })
+}
+
+viewEmployees = () => {
+    const sql = `SELECT employee.id, employee.first_name, employee.last_name, role.title,
+                department.name AS department, role.salary,
+                CONCAT (manager.first_name, ' ', manager.last_name) AS manager
+                FROM employee
+                LEFT JOIN role ON employee.role_id = role.id
+                LEFT JOIN department ON role.department_id = department.id
+                LEFT JOIN employee manager ON employee.manager_id = manager.id`;
+    connection.query(sql, (err, rows) => {
+        if (err) throw err;
+        console.table(rows);
+        userPrompt();
     })
 }
