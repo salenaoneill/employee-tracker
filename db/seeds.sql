@@ -1,28 +1,28 @@
-INSERT INTO department (department_id, name)
+INSERT INTO department (name)
 VALUES 
-(1, 'Engineering'),
-(2, 'Finance'),
-(3, 'Legal'),
-(4, 'Sales');
+('Engineering'),
+('Finance'),
+('Legal'),
+('Sales');
 
-INSERT INTO role (role_id, title, department, salary) 
+INSERT INTO role (title, department_id, salary) 
 VALUES 
-(1, 'Sales Lead', 'Sales', 100000),
-(2, 'Salesperson', 'Sales', 80000),
-(3, 'Lead Engineer', 'Engineering', 150000),
-(4, 'Software Engineer', 'Engineering', 120000),
-(5, 'Account Manager', 'Finance', 160000),
-(6, 'Accountant', 'Finance', 125000),
-(7, 'Legal Team Lead', 'Legal', 250000),
-(8, 'Lawyer', 'Legal', 190000);
+('Sales Lead', 4, 100000),
+('Salesperson', 4, 80000),
+('Lead Engineer', 1, 150000),
+('Software Engineer', 1, 120000),
+('Account Manager', 2, 160000),
+('Accountant', 2, 125000),
+('Legal Team Lead', 2, 250000),
+('Lawyer', 2, 190000);
 
-INSERT INTO employee (employee_id, first_name, last_name, title, department, salary, manager)
+INSERT INTO employee (first_name, last_name, role_id, manager_id)
 VALUES 
-(1, 'John', 'Doe', 'Sales Lead', 'Sales', 100000, null), 
-(2, 'Amelia', 'Evans', 'Salesperson', 80000, 'John Doe'),
-(3, 'Malia', 'Brown', 'Lead Engineer', 'Engineering', 150000, null),
-(4, 'Regina', 'George', 'Software Engineer', 'Engineering', 120000, 'Malia Brown'), 
-(5, 'Jessica', 'Rodriguez', 'Account Manager', 'Finance', 160000, null),
-(6, 'Shane', 'Popowski', 'Accountant', 'Finance', 125000, 'Jessica Rodriguez'),
-(7, 'Amy', 'Winehouse', 'Legal Team Lead', 'Legal', 250000, null),
-(8, 'Kurt', 'Cobain', 'Lawyer', 'Legal', 190000, 'Amy Winehouse');
+('John', 'Doe', 1, null), 
+('Amelia', 'Evans', 2, 1),
+('Malia', 'Brown', 3, null),
+('Regina', 'George', 4, 3), 
+('Jessica', 'Rodriguez', 5,  null),
+('Shane', 'Popowski', 6, 5),
+('Amy', 'Winehouse', 7, null),
+('Kurt', 'Cobain', 8, 7);
