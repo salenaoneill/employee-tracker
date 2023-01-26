@@ -32,7 +32,7 @@ function userPrompt(){
                 'view all employees',
                 'add a department',
                 'add a role',
-                'add an emplyee',
+                'add an employee',
                 'update an employee role'
             ]
         }
@@ -102,4 +102,165 @@ viewEmployees = () => {
         console.table(rows);
         userPrompt();
     })
+}
+
+addDepartment = () => {
+    inquirer.prompt([
+        {
+            type: 'input',
+            name: 'newDep',
+            message: 'enter name of department'
+        }
+    ]).then(answer => {
+        const sql = `INSERT INTO department (name)
+                    VALUES (?)`
+        connection.query(sql, answer.newDep, (err, result) => {
+            if (err) throw err;
+            console.log(answer.newDep + ' has been added to the database!')
+            viewDepartments(); 
+            userPrompt();
+        })
+    })
+}
+
+addRole = () => {
+    inquirer.prompt([
+        {
+            type: 'input',
+            name: 'role',
+            message: 'enter name of role', 
+        }, 
+        {
+            type: 'input',
+            name: 'salary',
+            message: 'enter salary of role',
+        },
+    ]).then(answer => {
+        const roleAndSalary = [answer.role, answer.salary];
+        const sqlRole = `SELECT name, id FROM department`;
+        connection.query(sqlRole, (err, data) => {
+            if (err) throw err;
+            const dep = data.map(({name, id }) => ({ name: name, value: id}));
+            inquirer.prompt([
+                {
+                    type: 'list',
+                    name: 'dep',
+                    message: 'what department does the role belong to?',
+                    choices: dep
+                }
+            ]).then(depChoice => {
+                const dep = depChoice.dep;
+                roleAndSalary.push(dep);
+                const sql = `INSERT INTO ROLE (title, salary, department_id)
+                VALUES (?, ?, ?)`;
+                connection.query(sql, roleAndSalary, (err, result) =>{
+                    if (err) throw err; 
+                    viewRoles();
+                    userPrompt();
+                });
+            });
+        });
+    });
+};
+
+
+
+addEmployee = () => {
+    inquirer.prompt([
+        {
+            type: 'input',
+            name: 'firstName',
+            message: 'what is the employee first name?',
+        },
+        {
+            type: 'input', 
+            name: 'lastName', 
+            message: 'what is the employee last name?'
+        }
+    ]).then(answer => {
+        const fullName = [answer.firstName, answer.lastName]
+        const sqlEmployee = `SELECT role.id, role.title FROM role`;
+        connection.query(sqlEmployee, (err, data) => {
+            if (err) throw err;
+            const roles = data.map(({id, title}) => ({name: title, value: id}));
+
+            inquirer.prompt([
+                {
+                    type: 'list',
+                    name: 'role',
+                    message: 'What is the employee role?',
+                    choices: roles
+                }
+            ]).then(roleChoice => {
+                const role = roleChoice.role;
+                fullName.push(role);
+                const sqlManager = `SELECT * FROM employee`;
+                connection.query(sqlManager, (err, data) => {
+                    if (err) throw err;
+                    const managers = data.map(({id, first_name, last_name}) => ({name: first_name + " " + last_name, value: id}));
+                    inquirer.prompt([
+                        {
+                            type: 'list',
+                            name: 'manager',
+                            message: 'Who is the employee manager?',
+                            choices: managers
+                        }
+                    ]).then(managerChoice => {
+                        const manager = managerChoice.manager
+                        fullName.push(manager);
+                        const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id)
+                        VALUES (?, ?, ?, ?)`;
+                        connection.query(sql, fullName, (err, result) => {
+                            if (err) throw err;
+                            viewEmployees();
+                            userPrompt();
+                        });
+                    });
+                });
+            });
+        });
+    });
+}
+
+
+updateEmployee = () => {
+    const sqlEmployee = `SELECT * FROM employee`;
+    connection.query(sqlEmployee, (err, data) => {
+        if (err) throw err;
+        const employees = data.map(({id, first_name, last_name}) => ({name: first_name + " " + last_name, value: id}));
+        inquirer.prompt([
+            {
+                type: 'list',
+                name: 'employee',
+                message: 'Which employee role do you want to update?',
+                choices: employees
+            }
+        ]).then(employeeChoice => {
+            const employeeId = employeeChoice.employee;
+            const roleChange = [];
+            const sqlRole = `SELECT * FROM role`;
+            connection.query(sqlRole, (err, data) => {
+                if (err) throw err;
+                const roles = data.map(({id, title}) => ({name: title, value: id}));
+                inquirer.prompt([
+                    {
+                        type: 'list', 
+                        name: 'role',
+                        message: 'Which role do you want to assign the selected employee?',
+                        choices: roles
+                    }
+                ]).then(roleChoice => {
+                    const role = roleChoice.role;
+                    roleChange.push(role);
+                    roleChange.push(employeeId);
+                    const sql = `UPDATE employee SET role_id = ? WHERE id = ?`;
+                    connection.query(sql, roleChange, (err, result) => {
+                        if (err) throw (err);
+                        viewEmployees();
+                        userPrompt();
+                    });
+                });
+            });
+        });
+    });
 }
