@@ -1,4 +1,4 @@
-# <employee-tracker>
+# employee-tracker
 
 ## Description
 
